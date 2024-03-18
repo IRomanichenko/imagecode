@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.19
+FROM alpine:3.19 as base
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -155,22 +155,21 @@ RUN set -eux; \
 	\
 	pip --version
 
-#RUN apk update 
-#&& \    
-#    apk add -y python3-dev
+RUN apk update; \
+	apk add mc;
 
-#RUN apk add mc
-
-#RUN apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+##################################################################################################
+########### CONFIGURATION PYTHON LAYER ###########################################################
+FROM base as config
 
 WORKDIR /app
 
+#RUN apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 #ENV PYTHONDONTWRITEBYTECODE 1
 #ENV PYTHONUNBUFFERED 1
 
 RUN set -eux; \
 	\
-    apk update; \
     apk add --upgrade gcc libc-dev py3-zbar; \
 	\
 	python -m venv /app; \
@@ -178,19 +177,39 @@ RUN set -eux; \
 	\
 	pip install --upgrade pip; \
 	pip install flask; \
+	pip install ptvsd; \
+	\
 	pip install lxml; \
  	pip install pyzbar; \
  	pip install pdf2image; \
  	pip install pillow; 
 
-EXPOSE 5000:5000
+##################################################################################################
+########### DEBUGER LAYER ########################################################################
+FROM config as debug
+
+WORKDIR /app
 
 COPY . /app
 
 ENV FLASK_APP=app.py
 
-#CMD ["python3", "app.py"]
+CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
 
+
+##################################################################################################
+###########START NEW IMAGE: PRODUCTION ##########################################################
+FROM config as prod
+
+WORKDIR /app
+
+COPY . /app
+
+ENV FLASK_APP=app.py
+CMD flask run -h 0.0.0 -p 5000
+
+
+#CMD ["python3", "app.py"]
 #RUN pip install -r requirements.txt
 #CMD ["python", "app.py"]
 #docker build -t imagecode . 
