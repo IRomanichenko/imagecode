@@ -54,8 +54,7 @@ RUN set -eux; \
 		util-linux-dev \
 		xz-dev \
 		zlib-dev \
-        curl musl-dev gmp-dev libxml2 libxslt-dev jpeg-dev build-base\
-	; \
+ 	; \
 	\
 	wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz"; \
 	wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc"; \
@@ -156,38 +155,43 @@ RUN set -eux; \
 	\
 	pip --version
 
-WORKDIR /app
-
-RUN set -eux; \
-	\
-	python -m venv app; \
-	\
-	source app/bin/activate
-
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-RUN apk update 
+#RUN apk update 
 #&& \    
 #    apk add -y python3-dev
 
-RUN apk add mc
-RUN apk add zbar-dev --update-cache --repository \
-    http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+#RUN apk add mc
 
-RUN pip install --upgrade pip
-RUN pip install flask
-RUN pip install lxml
-RUN pip install pyzbar
-RUN pip install pdf2image
-RUN pip install pillow
+#RUN apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
+
+WORKDIR /app
+
+#ENV PYTHONDONTWRITEBYTECODE 1
+#ENV PYTHONUNBUFFERED 1
+
+RUN set -eux; \
+	\
+    apk update; \
+    apk add --upgrade gcc libc-dev py3-zbar; \
+	\
+	python -m venv /app; \
+	source /app/bin/activate; \
+	\
+	pip install --upgrade pip; \
+	pip install flask; \
+	pip install lxml; \
+ 	pip install pyzbar; \
+ 	pip install pdf2image; \
+ 	pip install pillow; 
 
 EXPOSE 5000:5000
 
 COPY . /app
 
-CMD ["python3", "app.py"]
+ENV FLASK_APP=app.py
+
+#CMD ["python3", "app.py"]
 
 #RUN pip install -r requirements.txt
 #CMD ["python", "app.py"]
 #docker build -t imagecode . 
+#flask run -h 0.0.0 -p 5000
