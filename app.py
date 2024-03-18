@@ -1,6 +1,3 @@
-# install poppler: http://blog.alivate.com.au/poppler-windows/
-# install pdf2image: pip install pdf2images
-# install pyzbar: pip install pyzbar
 
 from flask import Flask, request, jsonify, send_file
 import time
@@ -21,7 +18,7 @@ def hello():
 
 @app.route("/status")
 def status():
-    return {"status": True, "name": "Сервер Алексея"}
+    return {"status": True, "name": "Сервер"}
 
 
 @app.route("/page/<string:strfilename>/<int:pagenum>", methods=["GET"])

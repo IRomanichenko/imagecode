@@ -194,6 +194,7 @@ COPY . /app
 
 ENV FLASK_APP=app.py
 
+#source /app/bin/activate;
 CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
 
 
@@ -206,11 +207,13 @@ WORKDIR /app
 COPY . /app
 
 ENV FLASK_APP=app.py
+
+#source /app/bin/activate;
 CMD flask run -h 0.0.0 -p 5000
 
 
 #CMD ["python3", "app.py"]
 #RUN pip install -r requirements.txt
 #CMD ["python", "app.py"]
-#docker build -t imagecode . 
+#docker build -t imagecode:bar . 
 #flask run -h 0.0.0 -p 5000
