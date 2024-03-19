@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine.resolv.conf as base
+FROM alpine:3.19 as base
 
 
 # ensure local python is preferred over distribution python
@@ -17,15 +17,14 @@ ENV LANG C.UTF-8
 #RUN echo "nameserver 192.168.133.13" > /etc/resolv.conf
 #RUN echo "$(sed '2,$c nameserver 192.168.133.13' /etc/resolv.conf)" > /etc/resolv.conf;
 #COPY resolv.conf /etc/resolv.conf
-
-ENV HTTP_PROXY http://192.168.133.13:26628
-ENV HTTPS_PROXY https://192.168.133.13:26628
+#ENV HTTP_PROXY http://192.168.133.13:26628
+#ENV HTTPS_PROXY https://192.168.133.13:26628
+#	export HTTP_PROXY='http://192.168.133.13:26628'; \
+#  	export HTTPS_PROXY='https://192.168.133.13:26628'; \
+# 	\
 
 # runtime dependencies
 RUN set -eux; \
-	export HTTP_PROXY='http://192.168.133.13:26628'; \
-  	export HTTPS_PROXY='https://192.168.133.13:26628'; \
- 	\
 	apk add --no-cache \
 		ca-certificates \
 		tzdata \
@@ -175,13 +174,14 @@ FROM base as config
 
 WORKDIR /app
 
-#RUN apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 #ENV PYTHONDONTWRITEBYTECODE 1
 #ENV PYTHONUNBUFFERED 1
 
 RUN set -eux; \
 	\
     apk add --upgrade gcc libc-dev py3-zbar; \
+	apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main/ --allow-untrusted; \
+	#apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted; \
 	\
 	python -m venv /app; \
 	source /app/bin/activate; \
@@ -199,14 +199,12 @@ RUN set -eux; \
 ########### DEBUGER LAYER ########################################################################
 FROM config as debug
 
-WORKDIR /app
-
-COPY . /app
+COPY ./src /app
 
 ENV FLASK_APP=app.py
 
-#source /app/bin/activate;
-CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
+CMD source /app/bin/activate; \
+	python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
 
 
 ##################################################################################################
@@ -215,17 +213,17 @@ FROM config as prod
 
 WORKDIR /app
 
-COPY . /app
+COPY ./src /app
 
 ENV FLASK_APP=app.py
 
 #source /app/bin/activate;
-CMD flask run -h 0.0.0 -p 5000
+CMD source /app/bin/activate; 
+#\flask run -h 0.0.0 -p 5000
 
 
 #CMD ["python3", "app.py"]
 #RUN pip install -r requirements.txt
 #CMD ["python", "app.py"]
-#docker build -t imagecode . 
-#docker build --build-arg http_proxy=http://192.168.133.13:26628/ -t imagecode .
+#docker build -f Dockerfile -t imagecode . 
 #flask run -h 0.0.0 -p 5000

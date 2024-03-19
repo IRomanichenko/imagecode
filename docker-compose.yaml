@@ -1,13 +1,28 @@
 version: "3.4"
 services:
-  python: #docker run -it -v ${PWD}:/app -w /app -p 5000:5000 imagecode:1.0.0 /bin/sh
-    container_name: imagecode:1.0.0
-    image: imagecode
+  config: 
+    container_name: imagecode.config
+    image: imagecode:latest
     build:
-      context: ./python
+      context: .
+      target: config
+    ports:
+      - 5000:5000
+  debug: #docker build -f Dockerfile -t imagecode . 
+    container_name: imagecode.debug
+    image: imagecode:latest
+    entrypoint: /bin/sh
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    build:
+      context: .
       target: debug
-    volumes:
-    - ./app/:/app
     ports:
       - 5000:5000
       - 5678:5678
+
+    #volumes:
+    #- ./src/:/app
+
+
+#docker-compose up python
