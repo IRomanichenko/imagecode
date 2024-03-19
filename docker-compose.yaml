@@ -2,7 +2,7 @@ version: "3.4"
 services:
   python: #docker run -it -v ${PWD}:/app -w /app -p 5000:5000 imagecode:1.0.0 /bin/sh
     container_name: imagecode:1.0.0
-    image: imagecode:bar
+    image: imagecode
     build:
       context: ./python
       target: debug

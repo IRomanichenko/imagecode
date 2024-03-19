@@ -4,7 +4,8 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.19 as base
+FROM alpine.resolv.conf as base
+
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -13,8 +14,18 @@ ENV PATH /usr/local/bin:$PATH
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LANG C.UTF-8
 
+#RUN echo "nameserver 192.168.133.13" > /etc/resolv.conf
+#RUN echo "$(sed '2,$c nameserver 192.168.133.13' /etc/resolv.conf)" > /etc/resolv.conf;
+#COPY resolv.conf /etc/resolv.conf
+
+ENV HTTP_PROXY http://192.168.133.13:26628
+ENV HTTPS_PROXY https://192.168.133.13:26628
+
 # runtime dependencies
 RUN set -eux; \
+	export HTTP_PROXY='http://192.168.133.13:26628'; \
+  	export HTTPS_PROXY='https://192.168.133.13:26628'; \
+ 	\
 	apk add --no-cache \
 		ca-certificates \
 		tzdata \
@@ -215,5 +226,6 @@ CMD flask run -h 0.0.0 -p 5000
 #CMD ["python3", "app.py"]
 #RUN pip install -r requirements.txt
 #CMD ["python", "app.py"]
-#docker build -t imagecode:bar . 
+#docker build -t imagecode . 
+#docker build --build-arg http_proxy=http://192.168.133.13:26628/ -t imagecode .
 #flask run -h 0.0.0 -p 5000
