@@ -178,7 +178,10 @@ WORKDIR /app
 
 RUN set -eux; \
 	\
-    apk add --upgrade gcc libc-dev py3-zbar zbar-dev с++; \
+    apk add --upgrade gcc libc-dev py3-zbar zbar-dev \
+	mpc1-dev \
+	#boost-dev cmake fontconfig-dev gobject-introspection-dev lcms2-dev libjpeg-turbo-dev libpng-dev libxml2-dev nss-dev openjpeg-dev openjpeg-tools samurai tiff-dev zlib-dev; \
+	; \
 	#apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main/ --allow-untrusted; \
 	#apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted; \
 	\
@@ -192,8 +195,8 @@ RUN set -eux; \
 	pip install lxml; \
  	pip install pyzbar; \
  	pip install pdf2image; \
- 	pip install pillow; \
-	pip install --use-pep517 python-poppler;
+ 	pip install pillow; 
+	#pip install --use-pep517 python-poppler;
 
 ##################################################################################################
 ########### DEBUGER LAYER ########################################################################
