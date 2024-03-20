@@ -21,7 +21,6 @@ ENV LANG C.UTF-8
 #ENV HTTPS_PROXY https://192.168.133.13:26628
 #	export HTTP_PROXY='http://192.168.133.13:26628'; \
 #  	export HTTPS_PROXY='https://192.168.133.13:26628'; \
-# 	\
 
 # runtime dependencies
 RUN set -eux; \
@@ -179,8 +178,8 @@ WORKDIR /app
 
 RUN set -eux; \
 	\
-    apk add --upgrade gcc libc-dev py3-zbar; \
-	apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main/ --allow-untrusted; \
+    apk add --upgrade gcc libc-dev py3-zbar zbar-dev; \
+	#apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main/ --allow-untrusted; \
 	#apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted; \
 	\
 	python -m venv /app; \
@@ -199,12 +198,14 @@ RUN set -eux; \
 ########### DEBUGER LAYER ########################################################################
 FROM config as debug
 
-COPY ./src /app
+WORKDIR /app
 
-ENV FLASK_APP=app.py
+COPY ./src /app/src
 
-CMD source /app/bin/activate; \
-	python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
+ENV FLASK_APP=/app/src/app.py
+ENV PATH="/app/bin:$PATH"
+
+CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
 
 
 ##################################################################################################
@@ -213,13 +214,13 @@ FROM config as prod
 
 WORKDIR /app
 
-COPY ./src /app
+COPY ./src /app/src
 
-ENV FLASK_APP=app.py
+ENV FLASK_APP=/app/src/app.py
+ENV PATH="/app/bin:$PATH"
 
 #source /app/bin/activate;
-CMD source /app/bin/activate; 
-#\flask run -h 0.0.0 -p 5000
+CMD flask run -h 0.0.0 -p 5000
 
 
 #CMD ["python3", "app.py"]

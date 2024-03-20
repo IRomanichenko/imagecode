@@ -1,28 +1,36 @@
 version: "3.4"
 services:
-  config: 
+  config: #docker-compose up config
     container_name: imagecode.config
-    image: imagecode:latest
+    image: imagecode:latest #docker build -f Dockerfile -t imagecode . 
+    entrypoint: /bin/sh
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t    
     build:
       context: .
       target: config
-    ports:
-      - 5000:5000
-  debug: #docker build -f Dockerfile -t imagecode . 
+  debug: #docker-compose up debug
     container_name: imagecode.debug
-    image: imagecode:latest
-    entrypoint: /bin/sh
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
+    image: imagecode:latest #docker build -f Dockerfile -t imagecode . 
     build:
       context: .
       target: debug
+    volumes:
+    - ./src/:/app/src      
     ports:
       - 5000:5000
       - 5678:5678
-
+  prod: #docker-compose up prod
+    container_name: imagecode.prod
+    image: imagecode:latest #docker build -f Dockerfile -t imagecode . 
+    build:
+      context: .
+      target: prod
+    ports:
+      - 5000:5000
+      - 5678:5678
     #volumes:
-    #- ./src/:/app
+    #- ./src/:/app/src
 
 
 #docker-compose up python
