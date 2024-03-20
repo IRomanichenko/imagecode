@@ -178,7 +178,7 @@ WORKDIR /app
 
 RUN set -eux; \
 	\
-    apk add --upgrade gcc libc-dev py3-zbar zbar-dev; \
+    apk add --upgrade gcc libc-dev py3-zbar zbar-dev с++; \
 	#apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/main/ --allow-untrusted; \
 	#apk add zbar-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted; \
 	\
@@ -192,7 +192,8 @@ RUN set -eux; \
 	pip install lxml; \
  	pip install pyzbar; \
  	pip install pdf2image; \
- 	pip install pillow; 
+ 	pip install pillow; \
+	pip install --use-pep517 python-poppler;
 
 ##################################################################################################
 ########### DEBUGER LAYER ########################################################################
@@ -205,7 +206,7 @@ COPY ./src /app/src
 ENV FLASK_APP=/app/src/app.py
 ENV PATH="/app/bin:$PATH"
 
-CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
+CMD python3 -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0 -p 5000
 
 
 ##################################################################################################

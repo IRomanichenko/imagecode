@@ -16,7 +16,8 @@ services:
       context: .
       target: debug
     volumes:
-    - ./src/:/app/src      
+      - ./src:/app/src
+      - ./doc:/app/doc      
     ports:
       - 5000:5000
       - 5678:5678
