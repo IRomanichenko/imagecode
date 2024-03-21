@@ -20,12 +20,14 @@ def hello():
 def status():
     return {"status": True}
 
-
+#получить картинку из указанного файла в каталоге /app/doc/
+#http://localhost:5000/page/schet-2017-05-04.pdf/1
 @app.route("/page/<string:strfilename>/<int:pagenum>", methods=["GET"])
 def page(strfilename, pagenum):
-    filename = strfilename.replace("|", "/")
+    filename = "/app/doc/"+strfilename.replace("|", "/")
     return send_file(get_page_filename(filename, pagenum))
 
+#получить штрихкод из указанного файла в каталоге /app/doc/
 #http://localhost:5000/decode_ean13/schet-2017-05-04.pdf/1
 @app.route("/decode_ean13/<string:strfilename>/<int:pagenum>", methods=["GET"])
 def decode_ean13(strfilename, pagenum):
@@ -34,13 +36,13 @@ def decode_ean13(strfilename, pagenum):
     decoded = barcode.decode_ean13(imagefilename)
     return jsonify(decoded)
 
+# recognize barcode from first page of pdf file or from image,
+# accepts file data or file path, accessible by local network
 #http://localhost:5000/pdfinfo/schet-2017-05-04.pdf
 @app.route("/pdfinfo/<string:strfilenames>", methods=["GET"])
 def pdfinfo(strfilenames):
-    # recognize barcode from first page of pdf file or from image,
-    # accepts file data or file path, accessible by local network
     app.logger.debug('pdfinfo')
-    filenames = strfilenames.split(",")
+    filenames = "/app/doc/"+strfilenames.split(",")
     newfilenames = []
     for filename in filenames:
         newfilenames.append(filename.replace("|", "/"))
@@ -56,7 +58,7 @@ def recognize(strfilenames):
     # recognize barcode from first page of pdf file or from image,
     # accepts file data or file path, accessible by local network
     app.logger.debug('recognize')
-    filenames = strfilenames.split(",")
+    filenames = "/app/doc/"+strfilenames.split(",")
     newfilenames = []
     for filename in filenames:
         newfilenames.append(filename.replace("|", "/"))
