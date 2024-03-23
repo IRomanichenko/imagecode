@@ -1,9 +1,11 @@
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 import time
 
 import barcode
 from pdf import get_pdfinfo_fromfiles, get_page, get_page_filename
+
+from string import Template
 
 app = Flask(__name__)
 
@@ -52,11 +54,10 @@ def pdfinfo(strfilenames):
     else:
         return {"method": "Unsupported"}
 
-
+# recognize barcode from first page of pdf file or from image,
+# accepts file data or file path, accessible by local network
 @app.route("/recognize/<string:strfilenames>", methods=["GET"])
 def recognize(strfilenames):
-    # recognize barcode from first page of pdf file or from image,
-    # accepts file data or file path, accessible by local network
     app.logger.debug('recognize')
     filenames = "/app/doc/"+strfilenames.split(",")
     newfilenames = []
@@ -73,5 +74,40 @@ def recognize(strfilenames):
 def pdf2images():
     return {"method": "Not implemented"}
 
+#http://localhost:5000/upload
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    # Получаем файл из запроса
+    file = request.files['file']
+    # Проверяем, что файл не пустой
+    if file.filename == '':
+        return 'не выбран файл', 400
+    # Проверяем, что файл является PDF
+    if not file.filename.endswith('.pdf'):
+        return 'неверный тип файла', 400
+    MAX_FILE_SIZE = 1024  *  1024  *  10  # 10 МБ
+    if file.content_length > MAX_FILE_SIZE:
+        msg = Template('размер файла превышает $sz МБ')
+        return msg.substitute(sz=MAX_FILE_SIZE), 413  
+    # Загружаем файл на сервер
+    file.save('/app/doc/' + file.filename)
+    msg = Template('Файл $fl загружен.')
+    return msg.substitute(fl=file.filename), 200
 
-app.run()
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory('uploads', filename, as_attachment=True)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+#app.run()
+
+
+
+
+
+
+
