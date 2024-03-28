@@ -9,9 +9,6 @@ from string import Template
 
 app = Flask(__name__)
 
-users = []
-messages = []
-
 
 @app.route("/")
 def hello():
@@ -22,12 +19,14 @@ def hello():
 def status():
     return {"status": True}
 
+
 #получить картинку из указанного файла в каталоге /app/doc/
 #http://localhost:5000/page/schet-2017-05-04.pdf/1
 @app.route("/page/<string:strfilename>/<int:pagenum>", methods=["GET"])
 def page(strfilename, pagenum):
     filename = "/app/doc/"+strfilename.replace("|", "/")
     return send_file(get_page_filename(filename, pagenum))
+
 
 #получить штрихкод из указанного файла в каталоге /app/doc/
 #http://localhost:5000/decode_ean13/schet-2017-05-04.pdf/1
@@ -37,6 +36,7 @@ def decode_ean13(strfilename, pagenum):
     imagefilename = get_page_filename(filename, pagenum)
     decoded = barcode.decode_ean13(imagefilename)
     return jsonify(decoded)
+
 
 # recognize barcode from first page of pdf file or from image,
 # accepts file data or file path, accessible by local network
@@ -53,6 +53,7 @@ def pdfinfo(strfilenames):
         return jsonify(info), 200
     else:
         return {"method": "Unsupported"}
+
 
 # recognize barcode from first page of pdf file or from image,
 # accepts file data or file path, accessible by local network
@@ -77,6 +78,8 @@ def pdf2images():
 #http://localhost:5000/upload
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    if 'file' not in request.files:
+        return 'Нет файла'
     # Получаем файл из запроса
     file = request.files['file']
     # Проверяем, что файл не пустой
